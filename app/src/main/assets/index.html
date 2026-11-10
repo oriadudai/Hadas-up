@@ -90,6 +90,8 @@
     <button class="btn ghost" id="editBtn">עריכת מילים</button>
   </div>
   <p class="small" id="countInfo"></p>
+  <button class="btn ghost" id="reshuffleBtn" style="display:none">ערבוב מחדש (כל המילים חוזרות)</button>
+  <div id="confirmBox" style="display:none;margin-top:8px"><span style="font-weight:700">להחזיר את כל המילים?</span> <button class="btn ghost" id="confirmYes">כן</button> <button class="btn ghost" id="confirmNo">ביטול</button></div>
 </section>
 
 <!-- HOW TO -->
@@ -223,7 +225,7 @@ VLSI
 const STORE_KEY = 'hadasup-words-v1';
 let words = loadWords();
 let roundLen = 60;
-let deck = [], current = null, results = [], timeLeft = 0, tick = null, locked = false, audio = null;
+let pool = [], skipped = [], outOfWords = false, current = null, results = [], timeLeft = 0, tick = null, locked = false, audio = null;
 
 function loadWords(){
   try{ const s = localStorage.getItem(STORE_KEY); if(s){ const w = parse(s); if(w.length) return w; } }catch(e){}
@@ -234,8 +236,33 @@ function saveWordsText(t){ try{ localStorage.setItem(STORE_KEY, t); }catch(e){} 
 
 const $ = id => document.getElementById(id);
 function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id===id)); }
-function updateInfo(){ $('countInfo').textContent = `${words.length} מילים במשחק · כל סיבוב מערבב אותן מחדש`; }
+// ---- word pool shared across rounds: guessed words never come back,
+// skipped words come back only after all fresh words were used ----
+const POOL_KEY = 'hadasup-pool-v1';
+function sig(){ return words.join('|'); }
+function resetPool(){ pool = shuffle(words); skipped = []; savePool(); }
+function savePool(){ try{ localStorage.setItem(POOL_KEY, JSON.stringify({sig:sig(), pool, skipped})); }catch(e){} }
+function loadPool(){
+  try{
+    const d = JSON.parse(localStorage.getItem(POOL_KEY) || 'null');
+    if(d && d.sig === sig()){ pool = d.pool; skipped = d.skipped; return; }
+  }catch(e){}
+  resetPool();
+}
+function updateInfo(){
+  const fresh = pool.length, left = pool.length + skipped.length;
+  let t = `${words.length} מילים במשחק · נשארו ${fresh} מילים חדשות`;
+  if(skipped.length) t += ` (+${skipped.length} שדילגו עליהן)`;
+  if(!left) t = `כל ${words.length} המילים שוחקו 🎉 לחצי על ערבוב מחדש כדי להתחיל שוב`;
+  $('countInfo').textContent = t;
+  $('reshuffleBtn').style.display = left < words.length ? '' : 'none';
+  $('confirmBox').style.display = 'none';
+}
+loadPool();
 updateInfo();
+$('reshuffleBtn').onclick = ()=>{ $('confirmBox').style.display = ''; $('reshuffleBtn').style.display = 'none'; };
+$('confirmNo').onclick = updateInfo;
+$('confirmYes').onclick = ()=>{ resetPool(); updateInfo(); };
 
 function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
 
@@ -295,7 +322,7 @@ $('editBtn').onclick = ()=>{ $('wordsBox').value = words.join('\n'); show('edit'
 $('saveWords').onclick = ()=>{
   const w = parse($('wordsBox').value);
   if(!w.length) return;
-  words = w; saveWordsText(w.join('\n')); updateInfo(); show('home');
+  words = w; saveWordsText(w.join('\n')); resetPool(); updateInfo(); show('home');
 };
 $('resetWords').onclick = ()=>{ $('wordsBox').value = DEFAULT_WORDS; };
 
@@ -306,7 +333,8 @@ function start(){
   try{ if(!audio) audio = new (window.AudioContext||window.webkitAudioContext)(); audio.resume && audio.resume(); }catch(e){}
   try{ const el = document.documentElement; if(el.requestFullscreen) el.requestFullscreen().catch(()=>{}); }catch(e){}
   try{ screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{}); }catch(e){}
-  deck = shuffle(words); results = [];
+  if(!pool.length && !skipped.length){ updateInfo(); return; }
+  results = []; outOfWords = false;
   show('count');
   let n = 3; $('countNum').textContent = n; beep(440,.15);
   const cd = setInterval(()=>{
@@ -328,8 +356,10 @@ function begin(){
 }
 
 function nextWord(){
-  if(!deck.length) deck = shuffle(words.filter(w=>!results.some(r=>r.w===w)).length ? words.filter(w=>!results.some(r=>r.w===w)) : words);
-  current = deck.pop();
+  if(!pool.length && skipped.length){ pool = shuffle(skipped); skipped = []; }
+  if(!pool.length){ current = null; outOfWords = true; savePool(); end(); return; }
+  current = pool.pop();
+  savePool();
   const el = $('word'); el.textContent = current;
   el.style.fontSize = current.length > 14 ? 'clamp(32px,8vw,84px)' : '';
 }
@@ -338,6 +368,8 @@ function answer(ok){
   if(locked || !current) return;
   locked = true;
   results.push({w:current, ok});
+  if(!ok) skipped.push(current);
+  savePool();
   const g = $('game');
   g.classList.add(ok ? 'flash-ok' : 'flash-pass');
   $('feedback').textContent = ok ? 'נכון! ✓' : 'דלג';
@@ -362,11 +394,17 @@ document.addEventListener('keydown', e=>{
 });
 
 function end(){
-  clearInterval(tick); tick = null; current = null; locked = false;
+  clearInterval(tick); tick = null; timeLeft = 0;
+  // the word on screen when time ran out was not played: put it back on top of the pool
+  if(current && !locked){ pool.push(current); }
+  current = null; locked = false;
+  savePool(); updateInfo();
+  const left = pool.length + skipped.length;
+  $('againBtn').style.display = left ? '' : 'none';
   beep(523,.15); setTimeout(()=>beep(659,.15),150); setTimeout(()=>beep(784,.3),300);
   const okN = results.filter(r=>r.ok).length;
   $('bigScore').textContent = okN;
-  $('resMsg').textContent = okN>=12 ? 'אלופת העולם בלהיות הדס 👑' : okN>=7 ? 'מכירה את עצמך מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
+  $('resMsg').textContent = !left ? 'נגמרו כל המילים! 🎉 אפשר לערבב מחדש בתפריט' : okN>=12 ? 'אלופת העולם בלהיות הדס 👑' : okN>=7 ? 'מכירה את עצמך מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
   $('resList').innerHTML = results.map(r=>`<div class="item ${r.ok?'ok':'pass'}"><span>${esc(r.w)}</span><span>${r.ok?'✓':'⏭'}</span></div>`).join('') || '<p class="small" style="text-align:center">לא היו מילים בסיבוב</p>';
   show('results');
 }
