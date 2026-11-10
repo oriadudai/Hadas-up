@@ -1,0 +1,49 @@
+name: Build APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to publish the release
+
+jobs:
+  build:
+    # ubuntu-24.04 ships with the Android SDK preinstalled (ANDROID_HOME is set)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Build release APK
+        env:
+          VERSION_CODE: ${{ github.run_number }}
+        run: |
+          set -o pipefail
+          gradle assembleRelease 2>&1 | tee build.log
+          cp app/build/outputs/apk/release/app-release.apk HadasUp.apk
+
+      # Surfaces compiler errors as an annotation, readable without the full log
+      - name: Report build errors
+        if: failure()
+        run: |
+          msg=$(grep -E "error:|ERROR:|What went wrong|e: " -A4 build.log | head -80 | sed -e 's/%/%25/g' -e 's/\r//g' | sed ':a;N;$!ba;s/\n/%0A/g')
+          echo "::error title=Build failed::${msg}"
+
+      # Publishes the APK so it can be downloaded directly on the phone:
+      # https://github.com/<owner>/<repo>/releases/latest/download/HadasUp.apk
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: הדס אפ 1.0.${{ github.run_number }}
+          files: HadasUp.apk
+          make_latest: true

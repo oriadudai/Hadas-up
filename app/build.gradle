@@ -1,0 +1,46 @@
+plugins {
+    id 'com.android.application'
+}
+
+// Set by GitHub Actions (run number); local builds fall back to 1.
+def buildNumber = (System.getenv("VERSION_CODE") ?: "1").toInteger()
+
+android {
+    namespace 'com.oria.hadasup'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId "com.oria.hadasup"
+        minSdk 26
+        targetSdk 34
+        versionCode buildNumber
+        versionName "1.0.${buildNumber}"
+    }
+
+    // Fixed signing key: a new APK installs over the old one and keeps the edited word list.
+    signingConfigs {
+        stable {
+            storeFile file("hadasup.keystore")
+            storePassword "gqzjYUjRpxNyboXgMuhn6XEo"
+            keyAlias "hadasup"
+            keyPassword "gqzjYUjRpxNyboXgMuhn6XEo"
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.stable
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.stable
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// No external libraries: only the Android framework (WebView, sensors, vibration).

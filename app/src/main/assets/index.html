@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>הדס אפ!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#ff4f9a; --pink2:#ffb3d4; --purple:#6a3df0; --yellow:#ffd23f;
+    --green:#1fbf75; --orange:#ff8a3d; --ink:#1d1033; --paper:#fff7fb;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;height:100%;font-family:'Rubik',system-ui,sans-serif;color:var(--ink);background:var(--paper);overflow:hidden;user-select:none;-webkit-user-select:none}
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+  .screen.on{display:flex}
+
+  /* home */
+  #home{background:
+     radial-gradient(circle at 15% 20%, var(--yellow) 0 40px, transparent 41px),
+     radial-gradient(circle at 85% 15%, var(--pink2) 0 60px, transparent 61px),
+     radial-gradient(circle at 80% 85%, #c7b8ff 0 70px, transparent 71px),
+     radial-gradient(circle at 10% 90%, var(--pink2) 0 30px, transparent 31px),
+     var(--paper);}
+  h1{font-size:clamp(48px,13vw,96px);font-weight:900;margin:0;line-height:.95;color:var(--pink);
+     text-shadow:4px 4px 0 var(--purple);letter-spacing:-1px}
+  .sub{font-size:18px;margin:10px 0 26px;font-weight:600}
+  .btn{font-family:inherit;font-weight:800;font-size:22px;border:3px solid var(--ink);border-radius:18px;
+       padding:14px 28px;background:var(--yellow);color:var(--ink);box-shadow:0 5px 0 var(--ink);cursor:pointer;margin:6px;min-width:220px}
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+  .btn.pink{background:var(--pink);color:#fff}
+  .btn.ghost{background:#fff;font-size:17px;padding:10px 18px;min-width:0}
+  .row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;align-items:center}
+  .seg{display:flex;border:3px solid var(--ink);border-radius:14px;overflow:hidden;margin:8px 0 18px}
+  .seg button{font-family:inherit;font-weight:700;font-size:17px;border:0;background:#fff;padding:8px 16px;cursor:pointer}
+  .seg button.sel{background:var(--purple);color:#fff}
+  .small{font-size:14px;opacity:.75;max-width:420px;line-height:1.5}
+
+  /* how-to + editor panels */
+  .panel{background:#fff;border:3px solid var(--ink);border-radius:20px;padding:20px;max-width:520px;width:100%;
+         box-shadow:0 6px 0 var(--ink);text-align:right;max-height:86vh;overflow:auto}
+  .panel h2{margin:0 0 10px;font-size:26px;color:var(--purple)}
+  .panel ol{padding-right:20px;margin:0 0 14px;line-height:1.7;font-size:17px}
+  textarea{width:100%;height:46vh;font-family:inherit;font-size:17px;border:2px solid var(--ink);border-radius:12px;padding:10px;direction:rtl;user-select:text;-webkit-user-select:text}
+
+  /* countdown */
+  #count{background:var(--purple);color:#fff}
+  #countNum{font-size:min(40vw,40vh);font-weight:900;line-height:1}
+  #countMsg{font-size:24px;font-weight:700}
+
+  /* game */
+  #game{padding:0;background:var(--pink)}
+  #game.flash-ok{background:var(--green)}
+  #game.flash-pass{background:var(--orange)}
+  .zones{position:absolute;inset:0;display:flex;direction:ltr}
+  .zone{flex:1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:14px;font-weight:800;font-size:18px;color:rgba(255,255,255,.75)}
+  .zone.ok{border-right:2px dashed rgba(255,255,255,.35)}
+  .hud{position:absolute;top:10px;left:16px;right:16px;display:flex;justify-content:space-between;font-weight:800;font-size:26px;color:#fff;pointer-events:none;direction:ltr}
+  #word{position:relative;pointer-events:none;color:#fff;font-weight:900;font-size:clamp(40px,12vw,120px);line-height:1.05;
+        padding:0 6vw;text-shadow:0 4px 0 rgba(0,0,0,.18);word-break:break-word}
+  #feedback{position:absolute;top:22%;font-size:min(14vw,90px);font-weight:900;color:#fff;pointer-events:none}
+  #quit{position:absolute;top:8px;left:50%;transform:translateX(-50%);font-family:inherit;background:rgba(255,255,255,.25);
+        color:#fff;border:0;border-radius:10px;padding:6px 12px;font-size:14px;font-weight:700;z-index:3}
+
+  /* results */
+  #results{background:var(--paper);justify-content:flex-start;padding-top:28px}
+  #bigScore{font-size:90px;font-weight:900;color:var(--pink);line-height:1;text-shadow:3px 3px 0 var(--purple)}
+  .list{max-width:520px;width:100%;margin:12px 0;overflow:auto;flex:1;text-align:right}
+  .item{display:flex;justify-content:space-between;padding:9px 14px;border-radius:12px;margin:5px 0;font-size:19px;font-weight:600;border:2px solid var(--ink)}
+  .item.ok{background:#d6f7e6}
+  .item.pass{background:#ffe2cf;opacity:.8}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<section id="home" class="screen on">
+  <h1>הדס אפ!</h1>
+  <div class="sub">🎂 מזל טוב הדס! · כמה טוב את מכירה את עצמך?</div>
+  <div>אורך סיבוב</div>
+  <div class="seg" id="timeSeg">
+    <button data-t="45">45 שנ׳</button>
+    <button data-t="60" class="sel">60 שנ׳</button>
+    <button data-t="90">90 שנ׳</button>
+  </div>
+  <button class="btn pink" id="startBtn">יאללה מתחילות!</button>
+  <div class="row" style="margin-top:10px">
+    <button class="btn ghost" id="howBtn">איך משחקים?</button>
+    <button class="btn ghost" id="editBtn">עריכת מילים</button>
+  </div>
+  <p class="small" id="countInfo"></p>
+</section>
+
+<!-- HOW TO -->
+<section id="how" class="screen">
+  <div class="panel">
+    <h2>איך משחקים</h2>
+    <ol id="howList">
+      <li>סובבי את הטלפון לרוחב והצמידי אותו למצח, עם המסך כלפי החברות.</li>
+      <li>החברות מסבירות את המילה בלי להגיד אותה.</li>
+      <li>ניחשת? הקישי עם <b>יד ימין</b> על המסך ✓</li>
+      <li>רוצה לדלג? הקישי עם <b>יד שמאל</b> ⏭</li>
+      <li>כשהזמן נגמר רואים את כל המילים מהסיבוב.</li>
+    </ol>
+    <p class="small" id="howNote">מבחינת מי שמסתכלת על המסך: צד שמאל = נכון, צד ימין = דילוג. כדאי לכבות נעילת סיבוב מסך.</p>
+    <button class="btn" data-back>הבנתי</button>
+  </div>
+</section>
+
+<!-- EDITOR -->
+<section id="edit" class="screen">
+  <div class="panel">
+    <h2>המילים</h2>
+    <p class="small">מילה אחת בכל שורה. אפשר להוסיף, למחוק ולשנות. השינויים נשמרים בדפדפן הזה בלבד.</p>
+    <textarea id="wordsBox"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="btn" id="saveWords">שמירה</button>
+      <button class="btn ghost" id="resetWords">חזרה לרשימה המקורית</button>
+    </div>
+  </div>
+</section>
+
+<!-- COUNTDOWN -->
+<section id="count" class="screen">
+  <div id="countMsg">שימי על המצח!</div>
+  <div id="countNum">3</div>
+</section>
+
+<!-- GAME -->
+<section id="game" class="screen">
+  <div class="zones">
+    <div class="zone ok" id="zoneOk">✓ נכון</div>
+    <div class="zone pass" id="zonePass">דלג ⏭</div>
+  </div>
+  <div class="hud"><span id="timer">60</span><span id="score">0 ✓</span></div>
+  <button id="quit">סיום</button>
+  <div id="word"></div>
+  <div id="feedback"></div>
+</section>
+
+<!-- RESULTS -->
+<section id="results" class="screen">
+  <div style="font-size:22px;font-weight:700">ניחשת</div>
+  <div id="bigScore">0</div>
+  <div id="resMsg" style="font-size:20px;font-weight:700;margin-top:6px"></div>
+  <div class="list" id="resList"></div>
+  <div class="row">
+    <button class="btn pink" id="againBtn">עוד סיבוב!</button>
+    <button class="btn ghost" data-back>לתפריט</button>
+  </div>
+</section>
+
+<script>
+const DEFAULT_WORDS = `רפאל
+הנדסת חשמל
+VLSI
+אימות פורמלי
+גאוס
+קפה שווה
+כיתה הפוכה
+מעבדה
+מורן
+שוהם
+נועה
+טרומפלדור
+הצינוק
+רחובות
+אחות בכורה
+אבוש
+סבתוש
+האחיין הנסיך
+בריכה
+פילאטיס
+כדורסל מתחילות
+ספורטינג
+פינג פונג
+טילון ריבת חלב
+גלידת מנגו
+פיצה
+פונדו
+סלט בטטה
+עוגת תפוזים
+שקשוקה
+סופלה שוקולד
+תפריט ורוד
+חלה ורודה
+מסיבת דיסקו
+מסיבת ריקודים
+רכיבה על סוסים
+אקרובטיקה אווירית
+החלקה על הקרח
+קרטינג
+האנטומיה של גריי
+פוואר קאפל
+רוקדימים
+ספר רומנטי
+ספוילרים
+סימנייה
+תלתלים
+צמה
+עקבים שחורים
+הסעה לעבודה
+כביש 6
+פקקים
+נהגת צעירה
+לצרוח שירים באוטו
+לנגן ולשיר
+חורף
+דובדבנים
+גשם
+טייץ ארוך
+מטריה עם פרפרים
+הקלטה של שעתיים
+ג'מיני
+ממוצע מדהים
+שבת ביחד
+משלוחי מנות
+הצילוווו
+מטורףףף
+טנקיו`;
+
+const STORE_KEY = 'hadasup-words-v1';
+let words = loadWords();
+let roundLen = 60;
+let deck = [], current = null, results = [], timeLeft = 0, tick = null, locked = false, audio = null;
+
+function loadWords(){
+  try{ const s = localStorage.getItem(STORE_KEY); if(s){ const w = parse(s); if(w.length) return w; } }catch(e){}
+  return parse(DEFAULT_WORDS);
+}
+function parse(t){ return t.split('\n').map(x=>x.trim()).filter(Boolean); }
+function saveWordsText(t){ try{ localStorage.setItem(STORE_KEY, t); }catch(e){} }
+
+const $ = id => document.getElementById(id);
+function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on', s.id===id)); }
+function updateInfo(){ $('countInfo').textContent = `${words.length} מילים במשחק · כל סיבוב מערבב אותן מחדש`; }
+updateInfo();
+
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// sound
+function beep(freq, dur, type='sine', vol=.25){
+  try{
+    if(!audio) return;
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = type; o.frequency.value = freq; g.gain.value = vol;
+    o.connect(g); g.connect(audio.destination);
+    const t = audio.currentTime;
+    g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t+dur);
+    o.start(t); o.stop(t+dur);
+  }catch(e){}
+}
+function okSound(){ beep(660,.12,'triangle'); setTimeout(()=>beep(990,.18,'triangle'),110); }
+function passSound(){ beep(220,.22,'sawtooth',.12); }
+const APP = !!window.AndroidBridge;
+function vibrate(p){
+  try{
+    if(APP){ window.AndroidBridge.vibrate(Array.isArray(p) ? 90 : p); return; }
+    navigator.vibrate && navigator.vibrate(p);
+  }catch(e){}
+}
+// called by the app: true = tilted down (correct), false = tilted up (pass)
+window.onTilt = function(correct){
+  if($('game').classList.contains('on')) answer(correct);
+};
+// called by the app on the Back button; returns true if the page handled it
+window.onBack = function(){
+  if($('game').classList.contains('on')){ end(); return true; }
+  if($('home').classList.contains('on')) return false;
+  if($('count').classList.contains('on')) return true;
+  show('home'); return true;
+};
+if(APP){
+  $('howList').innerHTML = `
+    <li>הצמידי את הטלפון למצח, עם המסך כלפי החברות.</li>
+    <li>החברות מסבירות את המילה בלי להגיד אותה.</li>
+    <li>ניחשת? הטי את הטלפון <b>למטה</b> (מסך לרצפה) ✓</li>
+    <li>רוצה לדלג? הטי <b>למעלה</b> (מסך לתקרה) ⏭</li>
+    <li>אחרי כל הטיה מחזירים את הטלפון למצח.</li>
+    <li>אפשר גם להקיש: יד ימין = נכון, יד שמאל = דילוג.</li>`;
+  $('howNote').textContent = 'כפתור החזרה בטלפון מסיים סיבוב.';
+}
+
+// time selector
+$('timeSeg').addEventListener('click', e=>{
+  const b = e.target.closest('button'); if(!b) return;
+  roundLen = +b.dataset.t;
+  document.querySelectorAll('#timeSeg button').forEach(x=>x.classList.toggle('sel', x===b));
+});
+
+document.querySelectorAll('[data-back]').forEach(b=>b.addEventListener('click', ()=>show('home')));
+$('howBtn').onclick = ()=>show('how');
+$('editBtn').onclick = ()=>{ $('wordsBox').value = words.join('\n'); show('edit'); };
+$('saveWords').onclick = ()=>{
+  const w = parse($('wordsBox').value);
+  if(!w.length) return;
+  words = w; saveWordsText(w.join('\n')); updateInfo(); show('home');
+};
+$('resetWords').onclick = ()=>{ $('wordsBox').value = DEFAULT_WORDS; };
+
+$('startBtn').onclick = start;
+$('againBtn').onclick = start;
+
+function start(){
+  try{ if(!audio) audio = new (window.AudioContext||window.webkitAudioContext)(); audio.resume && audio.resume(); }catch(e){}
+  try{ const el = document.documentElement; if(el.requestFullscreen) el.requestFullscreen().catch(()=>{}); }catch(e){}
+  try{ screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{}); }catch(e){}
+  deck = shuffle(words); results = [];
+  show('count');
+  let n = 3; $('countNum').textContent = n; beep(440,.15);
+  const cd = setInterval(()=>{
+    n--;
+    if(n>0){ $('countNum').textContent = n; beep(440,.15); }
+    else { clearInterval(cd); beep(880,.3); begin(); }
+  }, 1000);
+}
+
+function begin(){
+  try{ APP && window.AndroidBridge.resetTilt(); }catch(e){}
+  timeLeft = roundLen; $('timer').textContent = timeLeft; $('score').textContent = '0 ✓';
+  show('game'); nextWord();
+  tick = setInterval(()=>{
+    timeLeft--; $('timer').textContent = timeLeft;
+    if(timeLeft<=5 && timeLeft>0) beep(1200,.08,'square',.1);
+    if(timeLeft<=0) end();
+  }, 1000);
+}
+
+function nextWord(){
+  if(!deck.length) deck = shuffle(words.filter(w=>!results.some(r=>r.w===w)).length ? words.filter(w=>!results.some(r=>r.w===w)) : words);
+  current = deck.pop();
+  const el = $('word'); el.textContent = current;
+  el.style.fontSize = current.length > 14 ? 'clamp(32px,8vw,84px)' : '';
+}
+
+function answer(ok){
+  if(locked || !current) return;
+  locked = true;
+  results.push({w:current, ok});
+  const g = $('game');
+  g.classList.add(ok ? 'flash-ok' : 'flash-pass');
+  $('feedback').textContent = ok ? 'נכון! ✓' : 'דלג';
+  $('word').style.visibility = 'hidden';
+  ok ? (okSound(), vibrate(60)) : (passSound(), vibrate([30,40,30]));
+  $('score').textContent = results.filter(r=>r.ok).length + ' ✓';
+  setTimeout(()=>{
+    g.classList.remove('flash-ok','flash-pass');
+    $('feedback').textContent = ''; $('word').style.visibility = 'visible';
+    locked = false;
+    if(timeLeft>0) nextWord();
+  }, 650);
+}
+
+$('zoneOk').addEventListener('pointerdown', e=>{ e.preventDefault(); answer(true); });
+$('zonePass').addEventListener('pointerdown', e=>{ e.preventDefault(); answer(false); });
+$('quit').addEventListener('pointerdown', e=>{ e.stopPropagation(); end(); });
+document.addEventListener('keydown', e=>{
+  if(!$('game').classList.contains('on')) return;
+  if(e.key==='ArrowLeft' || e.key===' ') answer(true);
+  if(e.key==='ArrowRight') answer(false);
+});
+
+function end(){
+  clearInterval(tick); tick = null; current = null; locked = false;
+  beep(523,.15); setTimeout(()=>beep(659,.15),150); setTimeout(()=>beep(784,.3),300);
+  const okN = results.filter(r=>r.ok).length;
+  $('bigScore').textContent = okN;
+  $('resMsg').textContent = okN>=12 ? 'אלופת העולם בלהיות הדס 👑' : okN>=7 ? 'מכירה את עצמך מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
+  $('resList').innerHTML = results.map(r=>`<div class="item ${r.ok?'ok':'pass'}"><span>${esc(r.w)}</span><span>${r.ok?'✓':'⏭'}</span></div>`).join('') || '<p class="small" style="text-align:center">לא היו מילים בסיבוב</p>';
+  show('results');
+}
+function esc(s){ return s.replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+</script>
+</body>
+</html>
