@@ -590,7 +590,7 @@ function end(){
   beep(523,.15); setTimeout(()=>beep(659,.15),150); setTimeout(()=>beep(784,.3),300);
   const okN = results.filter(r=>r.ok).length;
   $('bigScore').textContent = okN;
-  $('resMsg').textContent = practice ? 'סיבוב ניסיון: המילים לא נספרו ונשארו בחבילה' : !left ? 'נגמרו כל המילים בחבילה! 🎉 עברו לחבילה השנייה בתפריט' : okN>=12 ? 'אלופת העולם בלהיות הדס 👑' : okN>=7 ? 'מכירה את עצמך מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
+  $('resMsg').textContent = practice ? 'סיבוב ניסיון: המילים לא נספרו ונשארו בחבילה' : !left ? 'נגמרו כל המילים בחבילה! 🎉 עברו לחבילה השנייה בתפריט' : okN>=12 ? 'אלופות העולם בהדס 👑' : okN>=7 ? 'מכירות את הדס מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
   $('resList').innerHTML = results.map(r=>`<div class="item ${r.ok?'ok':'pass'}"><span>${esc(r.w)}</span><span>${r.ok?'✓':'⏭'}</span></div>`).join('') || '<p class="small" style="text-align:center">לא היו מילים בסיבוב</p>';
   show('results');
 }
