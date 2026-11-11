@@ -23,9 +23,37 @@
      radial-gradient(circle at 80% 85%, #c7b8ff 0 70px, transparent 71px),
      radial-gradient(circle at 10% 90%, var(--pink2) 0 30px, transparent 31px),
      var(--paper);}
-  h1{font-size:clamp(48px,13vw,96px);font-weight:900;margin:0;line-height:.95;color:var(--pink);
+  .screen > *{flex-shrink:0}
+  #home{padding:max(10px,3vh) 4vw}
+  .home-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:4vw;align-items:center;width:100%;max-width:1000px}
+  .home-main{display:flex;flex-direction:column;align-items:center}
+  .home-main .row{margin-top:2vh}
+  .btn.big{font-size:clamp(20px,5vh,30px);padding:2.2vh 34px;min-width:min(320px,80%)}
+  .card{background:#fff;border:3px solid var(--ink);border-radius:22px;box-shadow:0 6px 0 var(--ink);
+        padding:2.6vh 20px;text-align:right}
+  .label{font-weight:800;font-size:clamp(13px,3.6vh,17px);margin:0 0 1vh;color:var(--purple)}
+  .decks{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:2.4vh}
+  .deck{font-family:inherit;border:3px solid var(--ink);border-radius:16px;background:var(--paper);color:var(--ink);
+        padding:1.6vh 8px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+  .deck b{font-size:clamp(15px,4.4vh,20px)}
+  .deck span{font-size:clamp(11px,3.2vh,14px);opacity:.75}
+  .deck.sel{background:var(--purple);color:#fff;box-shadow:0 4px 0 var(--ink)}
+  .deck.sel span{opacity:.9}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:2.2vh;align-items:center}
+  .chips button{font-family:inherit;font-weight:800;font-size:clamp(15px,4.2vh,19px);min-width:52px;
+        padding:1vh 10px;border:3px solid var(--ink);border-radius:999px;background:#fff;color:var(--ink);cursor:pointer}
+  .chips button.sel{background:var(--yellow);box-shadow:0 3px 0 var(--ink)}
+  .chips input{font-family:inherit;font-weight:800;font-size:18px;width:76px;padding:6px;border:3px solid var(--ink);
+        border-radius:999px;text-align:center;user-select:text;-webkit-user-select:text}
+  .info{font-size:clamp(12px,3.4vh,15px);opacity:.8;line-height:1.4}
+  .info-row{margin-top:.6vh;font-size:clamp(12px,3.4vh,15px)}
+  .link{font-family:inherit;background:none;border:0;padding:4px 2px;color:var(--purple);font-weight:800;
+        font-size:inherit;text-decoration:underline;cursor:pointer}
+  .link.strong{color:var(--pink)}
+  @media (max-aspect-ratio: 1/1){ .home-grid{grid-template-columns:1fr} }
+  h1{font-size:clamp(44px,17vh,96px);font-weight:900;margin:0;line-height:.95;color:var(--pink);
      text-shadow:4px 4px 0 var(--purple);letter-spacing:-1px}
-  .sub{font-size:18px;margin:10px 0 26px;font-weight:600}
+  .sub{font-size:clamp(14px,4.4vh,19px);margin:1.4vh 0 3vh;font-weight:600}
   .btn{font-family:inherit;font-weight:800;font-size:22px;border:3px solid var(--ink);border-radius:18px;
        padding:14px 28px;background:var(--yellow);color:var(--ink);box-shadow:0 5px 0 var(--ink);cursor:pointer;margin:6px;min-width:220px}
   .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
@@ -64,9 +92,15 @@
         color:#fff;border:0;border-radius:10px;padding:6px 12px;font-size:14px;font-weight:700;z-index:3}
 
   /* results */
-  #results{background:var(--paper);justify-content:flex-start;padding-top:28px}
-  #bigScore{font-size:90px;font-weight:900;color:var(--pink);line-height:1;text-shadow:3px 3px 0 var(--purple)}
-  .list{max-width:520px;width:100%;margin:12px 0;overflow:auto;flex:1;text-align:right}
+  #results{background:var(--paper);padding:3vh 4vw}
+  .res-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:4vw;width:100%;max-width:1000px;height:100%;align-items:center}
+  .res-side{display:flex;flex-direction:column;align-items:center}
+  #resMsg{font-size:clamp(15px,4.6vh,20px);font-weight:700;margin-top:1vh}
+  #results .list{max-height:100%;margin:0;display:grid;grid-template-columns:1fr 1fr;gap:8px;align-content:start}
+  #results .item{margin:0;font-size:clamp(14px,4.2vh,18px);padding:1.2vh 12px}
+  @media (max-aspect-ratio: 1/1){ .res-grid{grid-template-columns:1fr;grid-template-rows:auto 1fr} }
+  #bigScore{font-size:clamp(48px,18vh,90px);font-weight:900;color:var(--pink);line-height:1;text-shadow:3px 3px 0 var(--purple)}
+  .list{max-width:520px;width:100%;margin:12px 0;overflow:auto;flex:1 1 auto !important;min-height:0;text-align:right}
   .item{display:flex;justify-content:space-between;padding:9px 14px;border-radius:12px;margin:5px 0;font-size:19px;font-weight:600;border:2px solid var(--ink)}
   .item.ok{background:#d6f7e6}
   .item.pass{background:#ffe2cf;opacity:.8}
@@ -76,35 +110,42 @@
 
 <!-- HOME -->
 <section id="home" class="screen on">
-  <h1>הדס אפ!</h1>
-  <div class="sub">🎂 מזל טוב הדס! · כמה טוב את מכירה את עצמך?</div>
-  <div>חבילת מילים</div>
-  <div class="seg" id="deckSeg">
-    <button data-d="hadas">על הדס</button>
-    <button data-d="general">כללי (גיבוי)</button>
+  <div class="home-grid">
+    <div class="home-main">
+      <h1>הדס אפ!</h1>
+      <div class="sub">🎂 מזל טוב הדס! כמה טוב את מכירה את עצמך?</div>
+      <button class="btn pink big" id="startBtn">יאללה מתחילות!</button>
+      <div class="row">
+        <button class="btn ghost" id="practiceBtn">סיבוב ניסיון</button>
+        <button class="btn ghost" id="howBtn">איך משחקים?</button>
+        <button class="btn ghost" id="editBtn">עריכת מילים</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="label">חבילת מילים</div>
+      <div class="decks" id="deckSeg">
+        <button class="deck" data-d="hadas"><b>על הדס</b><span id="cnt-hadas"></span></button>
+        <button class="deck" data-d="general"><b>כללי (גיבוי)</b><span id="cnt-general"></span></button>
+      </div>
+      <div class="label">אורך סיבוב (שניות)</div>
+      <div class="chips" id="timeSeg">
+        <button data-t="20">20</button>
+        <button data-t="30">30</button>
+        <button data-t="45">45</button>
+        <button data-t="60">60</button>
+        <button data-t="90">90</button>
+        <button data-t="0" id="customT">אחר</button>
+        <input id="customSec" type="number" min="5" max="300" inputmode="numeric" style="display:none">
+      </div>
+      <div class="info" id="countInfo"></div>
+      <div class="info-row">
+        <button class="link" id="reshuffleBtn">ערבוב מחדש</button>
+        <span id="confirmBox" style="display:none"><b>להחזיר את כל המילים לחבילה?</b>
+          <button class="link strong" id="confirmYes">כן</button>
+          <button class="link" id="confirmNo">ביטול</button></span>
+      </div>
+    </div>
   </div>
-  <div>אורך סיבוב</div>
-  <div class="seg" id="timeSeg">
-    <button data-t="20">20</button>
-    <button data-t="30">30</button>
-    <button data-t="45">45</button>
-    <button data-t="60">60</button>
-    <button data-t="90">90</button>
-    <button data-t="0" id="customT">אחר…</button>
-  </div>
-  <div id="customBox" style="display:none;margin:-8px 0 14px">
-    <input id="customSec" type="number" min="5" max="300" inputmode="numeric"
-      style="font-family:inherit;font-size:18px;width:90px;padding:6px;border:2px solid var(--ink);border-radius:10px;text-align:center">
-    <span style="font-weight:700">שניות</span>
-  </div>
-  <button class="btn pink" id="startBtn">יאללה מתחילות!</button>
-  <div class="row" style="margin-top:10px">
-    <button class="btn ghost" id="howBtn">איך משחקים?</button>
-    <button class="btn ghost" id="editBtn">עריכת מילים</button>
-  </div>
-  <p class="small" id="countInfo"></p>
-  <button class="btn ghost" id="reshuffleBtn" style="display:none">ערבוב מחדש (כל המילים חוזרות)</button>
-  <div id="confirmBox" style="display:none;margin-top:8px"><span style="font-weight:700">להחזיר את כל המילים?</span> <button class="btn ghost" id="confirmYes">כן</button> <button class="btn ghost" id="confirmNo">ביטול</button></div>
 </section>
 
 <!-- HOW TO -->
@@ -150,19 +191,24 @@
   </div>
   <div class="hud"><span id="timer">60</span><span id="score">0 ✓</span></div>
   <button id="quit">סיום</button>
+  <div id="practiceTag" style="display:none;position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.25);color:#fff;font-weight:800;padding:4px 12px;border-radius:999px;z-index:3;pointer-events:none">ניסיון</div>
   <div id="word"></div>
   <div id="feedback"></div>
 </section>
 
 <!-- RESULTS -->
 <section id="results" class="screen">
-  <div style="font-size:22px;font-weight:700">ניחשת</div>
-  <div id="bigScore">0</div>
-  <div id="resMsg" style="font-size:20px;font-weight:700;margin-top:6px"></div>
-  <div class="list" id="resList"></div>
-  <div class="row">
-    <button class="btn pink" id="againBtn">עוד סיבוב!</button>
-    <button class="btn ghost" data-back>לתפריט</button>
+  <div class="res-grid">
+    <div class="res-side">
+      <div style="font-size:clamp(16px,5vh,22px);font-weight:700">ניחשת</div>
+      <div id="bigScore">0</div>
+      <div id="resMsg"></div>
+      <div class="row" style="margin-top:2vh">
+        <button class="btn pink" id="againBtn">עוד סיבוב!</button>
+        <button class="btn ghost" data-back>לתפריט</button>
+      </div>
+    </div>
+    <div class="list" id="resList"></div>
   </div>
 </section>
 
@@ -323,7 +369,7 @@ try{ const st = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}');
 function saveSettings(){ try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify({deck:deckKey, t:roundLen})); }catch(e){} }
 const wordsKey = ()=>'hadasup-words-v2-'+deckKey;
 let words = loadWords();
-let pool = [], skipped = [], outOfWords = false, current = null, results = [], timeLeft = 0, tick = null, locked = false, audio = null;
+let pool = [], skipped = [], outOfWords = false, practice = false, practiceDeck = [], current = null, results = [], timeLeft = 0, tick = null, locked = false, audio = null;
 
 function loadWords(){
   try{ const s = localStorage.getItem(wordsKey()); if(s){ const w = parse(s); if(w.length) return w; } }catch(e){}
@@ -347,11 +393,22 @@ function loadPool(){
   }catch(e){}
   resetPool();
 }
+// words left in a deck that is not the active one (read from its saved pool)
+function deckLeft(key){
+  let w = parse(DECKS[key].words);
+  try{ const sw = localStorage.getItem('hadasup-words-v2-'+key); if(sw && parse(sw).length) w = parse(sw); }catch(e){}
+  try{ const d = JSON.parse(localStorage.getItem('hadasup-pool-v2-'+key) || 'null');
+       if(d && d.sig === w.join('|')) return [d.pool.length + d.skipped.length, w.length]; }catch(e){}
+  return [w.length, w.length];
+}
 function updateInfo(){
-  const fresh = pool.length, left = pool.length + skipped.length;
-  let t = `${words.length} מילים במשחק · נשארו ${fresh} מילים חדשות`;
-  if(skipped.length) t += ` (+${skipped.length} שדילגו עליהן)`;
-  if(!left) t = `כל ${words.length} המילים שוחקו 🎉 עברו לחבילה השנייה או לחצי על ערבוב מחדש`;
+  const left = pool.length + skipped.length;
+  for(const key of Object.keys(DECKS)){
+    const [l, n] = key === deckKey ? [left, words.length] : deckLeft(key);
+    $('cnt-'+key).textContent = l ? `נשארו ${l} מתוך ${n}` : 'נגמרו המילים';
+  }
+  let t = skipped.length ? `${skipped.length} מילים שדילגו עליהן יחזרו בסוף.` : 'מילה שנוחשה לא תחזור.';
+  if(!left) t = 'כל המילים בחבילה הזאת שוחקו. עברו לחבילה השנייה או ערבבו מחדש.';
   $('countInfo').textContent = t;
   $('reshuffleBtn').style.display = left < words.length ? '' : 'none';
   $('confirmBox').style.display = 'none';
@@ -412,7 +469,7 @@ function paintSelectors(){
   document.querySelectorAll('#deckSeg button').forEach(x=>x.classList.toggle('sel', x.dataset.d===deckKey));
   const preset = [...document.querySelectorAll('#timeSeg button')].find(x=>+x.dataset.t===roundLen);
   document.querySelectorAll('#timeSeg button').forEach(x=>x.classList.toggle('sel', preset ? x===preset : x.id==='customT'));
-  $('customBox').style.display = preset ? 'none' : '';
+  $('customSec').style.display = preset ? 'none' : '';
   $('customSec').value = roundLen;
 }
 $('deckSeg').addEventListener('click', e=>{
@@ -424,7 +481,7 @@ $('timeSeg').addEventListener('click', e=>{
   const b = e.target.closest('button'); if(!b) return;
   if(+b.dataset.t){ roundLen = +b.dataset.t; saveSettings(); paintSelectors(); }
   else { document.querySelectorAll('#timeSeg button').forEach(x=>x.classList.toggle('sel', x===b));
-         $('customBox').style.display = ''; $('customSec').focus(); }
+         $('customSec').style.display = ''; $('customSec').focus(); }
 });
 $('customSec').addEventListener('input', ()=>{
   const v = Math.round(+$('customSec').value);
@@ -442,14 +499,18 @@ $('saveWords').onclick = ()=>{
 };
 $('resetWords').onclick = ()=>{ $('wordsBox').value = DECKS[deckKey].words; };
 
-$('startBtn').onclick = start;
-$('againBtn').onclick = start;
+$('startBtn').onclick = ()=>start(false);
+$('practiceBtn').onclick = ()=>start(true);
+$('againBtn').onclick = ()=>start(practice);
 
-function start(){
+// practice = a test round: random words, nothing is taken out of the real pool
+function start(isPractice){
+  practice = !!isPractice;
   try{ if(!audio) audio = new (window.AudioContext||window.webkitAudioContext)(); audio.resume && audio.resume(); }catch(e){}
   try{ const el = document.documentElement; if(el.requestFullscreen) el.requestFullscreen().catch(()=>{}); }catch(e){}
   try{ screen.orientation && screen.orientation.lock && screen.orientation.lock('landscape').catch(()=>{}); }catch(e){}
-  if(!pool.length && !skipped.length){ updateInfo(); return; }
+  if(practice) practiceDeck = shuffle(words);
+  else if(!pool.length && !skipped.length){ updateInfo(); return; }
   results = []; outOfWords = false;
   show('count');
   let n = 3; $('countNum').textContent = n; beep(440,.15);
@@ -462,6 +523,7 @@ function start(){
 
 function begin(){
   try{ APP && window.AndroidBridge.resetTilt(); }catch(e){}
+  $('practiceTag').style.display = practice ? '' : 'none';
   timeLeft = roundLen; $('timer').textContent = timeLeft; $('score').textContent = '0 ✓';
   show('game'); nextWord();
   tick = setInterval(()=>{
@@ -472,10 +534,17 @@ function begin(){
 }
 
 function nextWord(){
+  if(practice){
+    if(!practiceDeck.length) practiceDeck = shuffle(words);
+    current = practiceDeck.pop(); showWord(); return;
+  }
   if(!pool.length && skipped.length){ pool = shuffle(skipped); skipped = []; }
   if(!pool.length){ current = null; outOfWords = true; savePool(); end(); return; }
   current = pool.pop();
   savePool();
+  showWord();
+}
+function showWord(){
   const el = $('word'); el.textContent = current;
   el.style.fontSize = current.length > 14 ? 'clamp(32px,8vw,84px)' : '';
 }
@@ -484,8 +553,7 @@ function answer(ok){
   if(locked || !current) return;
   locked = true;
   results.push({w:current, ok});
-  if(!ok) skipped.push(current);
-  savePool();
+  if(!practice){ if(!ok) skipped.push(current); savePool(); }
   const g = $('game');
   g.classList.add(ok ? 'flash-ok' : 'flash-pass');
   $('feedback').textContent = ok ? 'נכון! ✓' : 'דלג';
@@ -512,15 +580,17 @@ document.addEventListener('keydown', e=>{
 function end(){
   clearInterval(tick); tick = null; timeLeft = 0;
   // the word on screen when time ran out was not played: put it back on top of the pool
-  if(current && !locked){ pool.push(current); }
+  if(current && !locked && !practice){ pool.push(current); }
   current = null; locked = false;
-  savePool(); updateInfo();
-  const left = pool.length + skipped.length;
+  if(!practice) savePool();
+  updateInfo();
+  const left = practice ? 1 : pool.length + skipped.length;
   $('againBtn').style.display = left ? '' : 'none';
+  $('againBtn').textContent = practice ? 'עוד סיבוב ניסיון' : 'עוד סיבוב!';
   beep(523,.15); setTimeout(()=>beep(659,.15),150); setTimeout(()=>beep(784,.3),300);
   const okN = results.filter(r=>r.ok).length;
   $('bigScore').textContent = okN;
-  $('resMsg').textContent = !left ? 'נגמרו כל המילים בחבילה! 🎉 עברו לחבילה השנייה בתפריט' : okN>=12 ? 'אלופת העולם בלהיות הדס 👑' : okN>=7 ? 'מכירה את עצמך מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
+  $('resMsg').textContent = practice ? 'סיבוב ניסיון: המילים לא נספרו ונשארו בחבילה' : !left ? 'נגמרו כל המילים בחבילה! 🎉 עברו לחבילה השנייה בתפריט' : okN>=12 ? 'אלופת העולם בלהיות הדס 👑' : okN>=7 ? 'מכירה את עצמך מעולה! 🎉' : okN>=3 ? 'יפה! עוד סיבוב? 💪' : 'הצילוווו 😂';
   $('resList').innerHTML = results.map(r=>`<div class="item ${r.ok?'ok':'pass'}"><span>${esc(r.w)}</span><span>${r.ok?'✓':'⏭'}</span></div>`).join('') || '<p class="small" style="text-align:center">לא היו מילים בסיבוב</p>';
   show('results');
 }
